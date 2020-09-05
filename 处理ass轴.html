@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta name="renderer" content="webkit"/>
+<meta name="author" content="TZ"/>
+<title>zimu</title>
+</head>
+<style>
+*{margin:0;padding:0;}
+ul{
+	list-style:none;
+	text-align:left;
+	}
+textarea{vertical-align:bottom;}
+#imp{width:520px;} #impW{width:195px;}
+.zhushi{font-size:5px;}
+input[type='checkbox']{margin-left:5px;}
+</style>
+<body>
+<div style="text-align:center">
+	<div style="display:inline-block;vertical-align:top">
+		<ul>
+			<li><textarea id="imp" placeholder="ass轴格式(可多行): Dialogue: 0,0:00:00.00,0:00:00.00,default,,0,0,0,,..."></textarea></li>
+			<li><button onclick="sf(this)">生成空轴</button><input type="checkbox" id="iBoo" style="vertical-align:middle"><label for="iBoo" style="vertical-align:middle" title="给空轴加上数字作为字幕，方便给字幕文本分行">"+num"<span class="zhushi">*</span></label></li>
+			<li><button onclick="cf(this)">提取字幕</button><input type="checkbox" id="nBoo" style="vertical-align:middle"><label for="nBoo" style="vertical-align:middle" title="是否用换行符连接每行，默认用空格">"\n"<span class="zhushi">*</span></label><input type="checkbox" id="lBoo" style="vertical-align:middle"><label for="lBoo" style="vertical-align:middle">"lowercase"</label></li>
+		</ul>
+	</div><div style="display:inline-block;margin-left:50px;">
+		<ul>
+			<li><textarea id="impW" placeholder="普通或ass轴格式的文本(可多行)"></textarea></li>
+			<li><button onclick="bf(this)" title="将左右两个文本框里的内容结合，左边不是空轴也没关系">两者结合*</button><input type="checkbox" id="bfBoo" style="vertical-align:middle"><label for="bfBoo" title="是否在首/尾添加'\N'">"+\N"<span class="zhushi">*</span></label><div style="display:inline;vertical-align:middle"><input id="rss" type="radio" name="boo" checked="checked" style="margin-left:5px;">首<input type="radio" name="boo">尾</div></li>
+			<li><button onclick="tr(this)" title="去掉每行首尾空格">trim*</button><input type="checkbox" id="tBoo" style="vertical-align:middle"><label for="tBoo" title="是否ass轴格式.(会去掉字幕开头空格)">"ass?"<span class="zhushi">*</span></label></li>
+			<li><button onclick="tl(this)">toLowerCase</button></li>
+		</ul>
+	</div>
+</div>
+
+<div id="show" contentEditable=true style="margin:20px"></div>
+</body>
+<script>
+var imp=getN("#imp"),show=getN("#show"),impW=getN("#impW");
+
+function sf(obj){
+	var arr=imp.value.split('\n');var div=document.createElement("div");
+	show.innerHTML="";
+	if(getN("#iBoo").checked){
+		var emj=["1","22","333","4444","5555","666666","7777777","88888888","999999999"],j=0;
+		for(var i=0;i<arr.length;i++){
+			div.innerHTML+=arr[i].trim()+emj[j]+"<br/>";
+			j==8?j=0:j++;
+			}
+		}
+	else{
+		for(var i=0;i<arr.length;i++){
+			div.innerHTML+=arr[i].match(/[\S ]*(?=0,0,0,,)/)+"0,0,0,,<br/>";
+			}
+		}
+	show.appendChild(div);
+	}
+function cf(obj){
+	var arr=imp.value.split('\n');var div=document.createElement("div"),str=" ";
+	show.innerHTML=""; getN("#nBoo").checked?str="<br/>":"";
+	for(var i=0;i<arr.length;i++){
+		div.innerHTML+=arr[i].match(/(?<=0,0,0,,)[\S ]*/)+str;
+		}
+	getN("#lBoo").checked?div.innerHTML=div.innerHTML.toLowerCase():"";
+	show.appendChild(div);
+	}
+function bf(obj){
+	var arr=imp.value.split('\n'),arr2=impW.value.split('\n'); var div=document.createElement("div"),i,str,str2;
+	show.innerHTML="";
+	for(i=0;i<arr.length;i++){
+		str=arr[i].match(/[\S ]*(?=0,0,0,,)/);str?str=str+"0,0,0,,":str=arr[i];
+		if(arr2[i]){
+			if(getN("#bfBoo").checked){getN("#rss").checked? str2="\\N"+arr2[i].trim() : str2=arr2[i].trim()+"\\N"; div.innerHTML+=str+str2+'<br/>';}
+			else{div.innerHTML+=str+arr2[i].trim()+'<br/>';}
+			}
+		else{div.innerHTML+=str+'<br/>';}
+		}
+	if(arr2[i]){
+		str="";var count=arr2.length-i;
+		for(var j=0;j<count;j++){
+			str+=arr2[i+j]+"\n";
+			}
+		impW.value=str.trim();
+		}
+	show.appendChild(div);
+	}
+function tr(obj){
+	var arr=impW.value.split('\n');var div=document.createElement("div");
+	show.innerHTML="";
+	if(getN("#tBoo").checked){
+		for(var i=0;i<arr.length;i++){
+			div.innerHTML+=arr[i].trim().replace(/(?<=0,0,0,,) +/,"");
+			}
+		}
+	else{
+		for(var i=0;i<arr.length;i++){
+			div.innerHTML+=arr[i].trim()+"<br/>";
+			}
+		}
+	show.appendChild(div);
+	}
+function tl(obj){
+	show.innerHTML=impW.value.toLowerCase();
+	}
+function getN(str){return document.querySelector(str);}
+</script>
+</html>
